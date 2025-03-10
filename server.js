@@ -4,15 +4,15 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 
 const connectDB = require('./config/databases');
-const categoryRoute = require('./routes/categoryRoute');
 
+// All Routes
+const categoryRoute = require('./routes/categoryRoute');
+const couponRoute = require('./routes/promoRoute');
 
 
 
 // Connect to MongoDB Database using Mongoose 
 connectDB();
-
-
 
 
 
@@ -28,6 +28,7 @@ app.use(express.json()); // Cela signifie que si une requête HTTP contient un c
 
 // Mount Routes
 app.use('/api/v1/categories', categoryRoute);
+app.use('/api/v1/coupons', couponRoute);
 
 
 
