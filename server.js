@@ -8,8 +8,11 @@ const categoryRoute = require('./routes/categoryRoute');
 
 
 
+
 // Connect to MongoDB Database using Mongoose 
 connectDB();
+
+
 
 
 
