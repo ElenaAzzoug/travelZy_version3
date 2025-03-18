@@ -4,7 +4,7 @@ const {
     getCouponById,
     getAllCoupons,
     deleteCouponByID
-} = require("../controllers/promoController");
+} = require("../services/promoController");
 
 const router = express.Router();
 

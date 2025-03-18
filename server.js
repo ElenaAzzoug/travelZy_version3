@@ -27,11 +27,11 @@ app.use('/api/v1/categories', categoryRoute);
 
 // Définir une route de test
 app.get("/", (req, res) => {
-    res.send("🚀 API is running...");
+    res.send(" API is running...");
 });
 
 // Start the server
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
-    console.log(`✅ Server is running on http://localhost:${PORT}`);
+    console.log(` Server is running on http://localhost:${PORT}`);
 });
