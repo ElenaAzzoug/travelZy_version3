@@ -22,9 +22,9 @@ const app = express();
 (async () => {
   try {
     await connectDB();
-    console.log("✅ MongoDB connected successfully.");
+    console.log(" MongoDB connected successfully.");
   } catch (error) {
-    console.error("❌ MongoDB connection failed:", error);
+    console.error(" MongoDB connection failed:", error);
     process.exit(1); // Quitter l'application en cas d'échec
   }
 })();
@@ -42,7 +42,7 @@ app.use(cors()); // Autoriser les requêtes cross-origin
 const isDev = process.env.NODE_ENV === "development";
 if (isDev) {
   app.use(morgan("dev"));
-  console.log(`🔧 Running in development mode`);
+  console.log(` Running in development mode`);
 }
 
 // Montage des routes
@@ -53,7 +53,7 @@ app.use("/api/v1/users", userRoute);
 
 // Route par défaut
 app.get("/", (req, res) => {
-  res.send("🚀 API is running...");
+  res.send(" API is running...");
 });
 
 // Gestion des erreurs
@@ -63,6 +63,6 @@ app.use(errorHandler); // Middleware global de gestion des erreurs
 // Démarrage du serveur
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT} in ${isDev ? "development" : "production"} mode`);
+  console.log(` Server is running on http://localhost:${PORT} in ${isDev ? "development" : "production"} mode`);
 });
 
