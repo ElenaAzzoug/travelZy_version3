@@ -105,5 +105,33 @@ const deleteUser = async (email, password) => {
     throw error;
   }
 };
+// Changer le mot de passe d'un utilisateur
+const changePassword = async (email, oldPassword, newPassword) => {
+    try {
+      const user = await User.findOne({ email });
+  
+      if (!user) {
+        throw new Error("User not found.");
+      }
+  
+      // Vérifier l'ancien mot de passe
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        throw new Error("Invalid old password.");
+      }
+  
+      // Hacher le nouveau mot de passe
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+  
+      // Mettre à jour le mot de passe
+      user.password = hashedPassword;
+      await user.save();
+  
+      return { message: "Password changed successfully." };
+    } catch (error) {
+      throw error;
+    }
+  };
+  
 
-module.exports = { createUser, getUserInfo, updateUser, deleteUser };
+module.exports = { createUser, getUserInfo, updateUser, deleteUser, changePassword };

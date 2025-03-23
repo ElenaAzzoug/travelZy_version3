@@ -1,7 +1,7 @@
 const User = require("../models/userModel"); // Assure-toi que le chemin est correct
 
 const express = require("express");
-const { createUser, getUserInfo, updateUser, deleteUser } = require("../services/userService");
+const { createUser, getUserInfo, updateUser, deleteUser, changePassword } = require("../services/userService");
 
 const router = express.Router();
 
@@ -55,5 +55,15 @@ router.get("/", async (req, res) => {
         res.status(500).json({ message: "Erreur serveur", error });
     }
 });
-
+// Route pour changer le mot de passe
+router.put("/change-password", async (req, res) => {
+    try {
+      const { email, oldPassword, newPassword } = req.body;
+      const result = await changePassword(email, oldPassword, newPassword);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+  
 module.exports = router;
