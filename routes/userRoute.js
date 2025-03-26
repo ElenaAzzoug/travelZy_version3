@@ -1,7 +1,7 @@
 const User = require("../models/userModel"); // Assure-toi que le chemin est correct
 
 const express = require("express");
-const { createUser, getUserInfo, updateUser, deleteUser, changePassword } = require("../services/userService");
+const { createUser, getUserInfo, updateUser, deleteUser, changePassword,resetPassword ,requestPasswordReset } = require("../services/userService");
 
 const router = express.Router();
 
@@ -65,5 +65,29 @@ router.put("/change-password", async (req, res) => {
       res.status(400).json({ message: error.message });
     }
   });
+
+
+
+// Route to request password reset
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await requestPasswordReset(email);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Route to reset password
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    const result = await resetPassword(token, newPassword);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
   
 module.exports = router;
