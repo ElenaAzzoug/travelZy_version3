@@ -1,8 +1,8 @@
 const User = require("../models/userModel"); // Assure-toi que le chemin est correct
 
 const express = require("express");
-const { createUser, getUserInfo, updateUser, deleteUser, changePassword,resetPassword ,requestPasswordReset } = require("../services/userService");
-
+const { createUser, getUserInfo, updateUser, deleteUser, changePassword,resetPassword ,requestPasswordReset,loginUser } = require("../services/userService");
+const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Route pour créer un compte
@@ -15,11 +15,21 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// Route pour récupérer les informations du compte (avec email + password)
-router.post("/me", async (req, res) => {
+// Login Route
+router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const userInfo = await getUserInfo(email, password);
+    const user = await loginUser(req.body.email,req.body.password);
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Route pour récupérer les informations du compte (avec email + password)
+router.get("/me", protect, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userInfo = await getUserInfo(userId);
     res.status(200).json(userInfo);
   } catch (error) {
     res.status(400).json({ message: error.message });

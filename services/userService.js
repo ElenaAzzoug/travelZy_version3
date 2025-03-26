@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 const crypto = require("crypto");
+const generateToken = require('../middleware/jwtMiddleware')
 // Création d'un utilisateur
 const createUser = async (userData) => {
   try {
@@ -23,7 +24,8 @@ const createUser = async (userData) => {
       lastName,
       email,
       password: hashedPassword,
-      profilePicture
+      profilePicture,
+      isAdmin:false
     });
 
     await newUser.save();
@@ -33,8 +35,8 @@ const createUser = async (userData) => {
   }
 };
 
-// Récupérer les informations de l'utilisateur via email et mot de passe
-const getUserInfo = async (email, password) => {
+//Login User
+const loginUser = async (email, password) => {
   try {
     const user = await User.findOne({ email });
 
@@ -47,6 +49,7 @@ const getUserInfo = async (email, password) => {
     if (!isMatch) {
       throw new Error("Invalid password.");
     }
+    const token = generateToken(user._id, user.isAdmin)
 
     // Ne pas renvoyer le mot de passe
     return {
@@ -54,7 +57,26 @@ const getUserInfo = async (email, password) => {
       lastName: user.lastName,
       email: user.email,
       profilePicture: user.profilePicture,
-      createdAt: user.createdAt
+      createdAt: user.createdAt,
+      token
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+//Get me
+const getUserInfo = async (id) => {
+  try {
+    const user = await User.findById(id)
+    return {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      profilePicture: user.profilePicture,
+      createdAt: user.createdAt,
+      isAdmin:user.isAdmin
     };
   } catch (error) {
     throw error;
@@ -205,4 +227,4 @@ const resetPassword = async (token, newPassword) => {
 };
   
 
-module.exports = { createUser, getUserInfo, updateUser, deleteUser, changePassword,requestPasswordReset,resetPassword };
+module.exports = { createUser, getUserInfo, updateUser, deleteUser, changePassword,requestPasswordReset,resetPassword,loginUser };
