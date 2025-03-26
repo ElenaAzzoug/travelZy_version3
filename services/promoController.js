@@ -1,5 +1,7 @@
 const PromoCode = require("../models/CodePromo");
 
+
+
 // ➤ Créer un coupon
 exports.createCoupon = async (req, res) => {
     try {
@@ -12,6 +14,8 @@ exports.createCoupon = async (req, res) => {
     }
 };
 
+
+
 // ➤ Obtenir un coupon par ID
 exports.getCouponById = async (req, res) => {
     try {
@@ -23,6 +27,9 @@ exports.getCouponById = async (req, res) => {
     }
 };
 
+
+
+
 // ➤ Obtenir tous les coupons
 exports.getAllCoupons = async (req, res) => {
     try {
@@ -32,6 +39,9 @@ exports.getAllCoupons = async (req, res) => {
         res.status(500).json({ message: "Erreur lors de la récupération des coupons", error });
     }
 };
+
+
+
 
 // ➤ Supprimer un coupon par ID
 exports.deleteCouponByID = async (req, res) => {
