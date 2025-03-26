@@ -1,6 +1,8 @@
 const User = require("../models/UserModel");
 const bcrypt = require("bcryptjs");
-
+const nodemailer = require("nodemailer");
+require("dotenv").config();
+const crypto = require("crypto");
 // Création d'un utilisateur
 const createUser = async (userData) => {
   try {
@@ -132,6 +134,75 @@ const changePassword = async (email, oldPassword, newPassword) => {
       throw error;
     }
   };
+
+
+// Configure nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+
+// Request password reset
+const requestPasswordReset = async (email) => {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    // Generate token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
+
+    await user.save();
+
+    // Send email
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    await transporter.sendMail({
+      to: user.email,
+      from: process.env.EMAIL_USER,
+      subject: "Password Reset",
+      text: `Click this link to reset your password: ${resetLink}`,
+    });
+
+    return { message: "Password reset link sent to email" };
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Reset password with token
+const resetPassword = async (token, newPassword) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      throw new Error("Invalid or expired token.");
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    // Clear reset token
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    return { message: "Password reset successful" };
+  } catch (error) {
+    throw error;
+  }
+};
   
 
-module.exports = { createUser, getUserInfo, updateUser, deleteUser, changePassword };
+module.exports = { createUser, getUserInfo, updateUser, deleteUser, changePassword,requestPasswordReset,resetPassword };
