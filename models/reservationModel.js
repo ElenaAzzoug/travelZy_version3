@@ -4,13 +4,13 @@ const reservationSchema = new mongoose.Schema(
   {
     client: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Client",
-      required: [true, "Please provide a client Id"],
+      ref: "User",
+      required: true
     },
     voyage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Voyage",
-      required: [true, "Please provide a voyage Id"],
+      required: true
     },
     paymentMethodType: {
       type: String,
@@ -38,9 +38,13 @@ const reservationSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    prixTotal: {
+      type: Number,
+      required: true
+    }
     
-  },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+  
+     } ,{ timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 

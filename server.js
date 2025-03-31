@@ -11,6 +11,7 @@ const categoryRoute = require("./routes/categoryRoute");
 const couponRoute = require("./routes/promoRoute");
 const voyageRoute = require("./routes/voyageRoute");
 const userRoute = require("./routes/userRoute");
+const reservationRoute = require("./routes/reservationRoute");
 
 // Importation des middlewares d'erreur
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
@@ -31,7 +32,7 @@ const app = express();
 
 // Vérifier si MongoDB se déconnecte
 mongoose.connection.on("disconnected", () => {
-  console.warn("⚠️ MongoDB disconnected.");
+  console.warn(" MongoDB disconnected.");
 });
 
 // Middlewares
@@ -50,6 +51,7 @@ app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/coupons", couponRoute);
 app.use("/api/v1/voyages", voyageRoute);
 app.use("/api/v1/users", userRoute);
+app.use("/api/v1/reservations", reservationRoute);
 
 // Route par défaut
 app.get("/", (req, res) => {

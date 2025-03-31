@@ -1,7 +1,7 @@
 const express = require('express');
 
 const {
-    createCategory,getVoyagesByCategory,getAllCategories ,  getVoyagesByCategoryName
+    createCategory,getVoyagesByCategory,getAllCategories ,  getVoyagesByCategoryName , deleteCategoryByName 
 } = require('../services/categoryService'); // Import de la nouvelle fonction
 
 const router = express.Router(); // create a new router  object 
@@ -15,6 +15,9 @@ router.get('/:categoryId/voyages', getVoyagesByCategory);
 
 // Route pour récupérer les voyages par **Nom** de catégorie (nouvelle méthode)
 router.get('/voyages/:categoryName', getVoyagesByCategoryName);
+
+// Supprimer une catégorie par son **Nom**
+router.delete('/delete/:categoryName', deleteCategoryByName);
 
 
 module.exports = router; // export the router object

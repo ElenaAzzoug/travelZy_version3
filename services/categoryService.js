@@ -29,12 +29,12 @@ exports.getAllCategories = asyncHandler(async (req, res) => {
 exports.getVoyagesByCategory = asyncHandler(async (req, res) => {
     const { categoryId } = req.params;
 
-    // Vérifier si la catégorie existe
+    // Vérifier si la catégorie existe par son id 
     const category = await CategoryModel.findById(categoryId);
     if (!category) {
         return res.status(404).json({ success: false, message: "Catégorie non trouvée" });
     }
-
+    
     // Récupérer les voyages de cette catégorie 
     const voyages = await VoyageModel.find({ category: categoryId }).populate('category');
 
@@ -63,4 +63,20 @@ exports.getVoyagesByCategoryName = asyncHandler(async (req, res) => {
         count: voyages.length,
         data: voyages
     });
+});
+// Supprimer une catégorie par son nom
+exports.deleteCategoryByName = asyncHandler(async (req, res) => {
+    const { categoryName } = req.params;
+
+    // Vérifier si la catégorie existe (insensible à la casse)
+    const category = await CategoryModel.findOne({ name: { $regex: new RegExp("^" + categoryName + "$", "i") } });
+
+    if (!category) {
+        return res.status(404).json({ success: false, message: "Catégorie non trouvée" });
+    }
+
+    // Supprimer la catégorie
+    await CategoryModel.deleteOne({ _id: category._id });
+
+    res.status(200).json({ success: true, message: `Catégorie '${categoryName}' supprimée avec succès` });
 });
