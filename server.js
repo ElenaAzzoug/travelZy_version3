@@ -12,6 +12,7 @@ const couponRoute = require("./routes/promoRoute");
 const voyageRoute = require("./routes/voyageRoute");
 const userRoute = require("./routes/userRoute");
 const reservationRoute = require("./routes/reservationRoute");
+const paymentRoute = require('./routes/paymentRoutes')
 
 // Importation des middlewares d'erreur
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
@@ -52,7 +53,7 @@ app.use("/api/v1/coupons", couponRoute);
 app.use("/api/v1/voyages", voyageRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/reservations", reservationRoute);
-
+app.use("/api/v1/payments", paymentRoute);
 // Route par défaut
 app.get("/", (req, res) => {
   res.send(" API is running...");

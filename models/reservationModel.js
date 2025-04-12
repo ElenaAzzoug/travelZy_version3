@@ -14,13 +14,14 @@ const reservationSchema = new mongoose.Schema(
     },
     paymentMethodType: {
       type: String,
-      enum: ["credit_card", "paypal"],
+      enum: ["card", "paypal"],
       required: true,
     },
     status: {
       type: String,
       enum: ["pending", "confirmed", "cancelled"],
       required: true,
+      default:"pending"
     },
     dateRéservation: {
       type: Date,
@@ -41,6 +42,9 @@ const reservationSchema = new mongoose.Schema(
     prixTotal: {
       type: Number,
       required: true
+    },
+    paymentIntentId: {
+      type: String,
     }
     
   

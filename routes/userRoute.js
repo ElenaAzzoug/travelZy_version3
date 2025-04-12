@@ -1,4 +1,4 @@
-const User = require("../models/userModel"); // Assure-toi que le chemin est correct
+const User = require("../models/UserModel"); // Assure-toi que le chemin est correct
 
 const express = require("express");
 const { createUser, getUserInfo, updateUser, deleteUser, changePassword,resetPassword ,requestPasswordReset,loginUser } = require("../services/userService");
@@ -37,12 +37,18 @@ router.get("/me", protect, async (req, res) => {
 });
 
 // Route pour mettre à jour le compte (avec email + password)
-router.put("/me", async (req, res) => {
+router.put("/me",protect, async (req, res) => {
   try {
-    const { email, password, updateData } = req.body;
-    const result = await updateUser(email, password, updateData);
+    let userData = {
+      email: req.body.email,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      password:req.body.password
+    };
+    const result = await updateUser(req.user.id, userData);
     res.status(200).json(result);
   } catch (error) {
+    console.log(error)
     res.status(400).json({ message: error.message });
   }
 });
@@ -57,14 +63,53 @@ router.delete("/me", async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
-router.get("/", async (req, res) => {
+
+
+
+// get all users for admin
+router.get("/",protect, async (req, res) => {
     try {
-        const users = await User.find({}, "-password"); // Exclure le champ password pour la sécurité
+      if(!req.user.isAdmin){
+        return res.status(403).json({success:false,message:'Unothorized'})
+    }
+      const users = await User.find({_id: {$ne: req.user.id}}).select('-password')
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: "Erreur serveur", error });
     }
 });
+
+
+// update user by id ( admin )
+router.get("/:id",protect, async (req, res) => {
+    try {
+      if(!req.user.isAdmin){
+        return res.status(403).json({success:false,message:'Unothorized'})
+    }
+      const user = await User.findById(req.params.id).select('-password')
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error });
+    }
+});
+
+
+// delete user by id ( admin )
+router.delete("/:id",protect, async (req, res) => {
+    try {
+      if(!req.user.isAdmin){
+        return res.status(403).json({success:false,message:'Unothorized'})
+    }
+      const user = await User.findByIdAndDelete(req.params.id)
+        res.json({success:true,message:'utilisateur supprimé avec success'});
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur", error });
+    }
+});
+
+
+
+
 // Route pour changer le mot de passe
 router.put("/change-password", async (req, res) => {
     try {

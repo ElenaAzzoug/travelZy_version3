@@ -7,10 +7,11 @@ const {createReservation,
   getTotalClientsByPeriod,   
     getTotalRevenueByPeriod,      
     getTotalBalance,
-    deleteReservation
+    deleteReservation, confirmReservationStatus
 } = require('../services/reservationService');
+const { protect } = require("../middleware/authMiddleware");
 
-router.post("/", createReservation); // Route pour ajouter une réservation
+router.post("/",protect, createReservation); // Route pour ajouter une réservation
 
 // Route pour récupérer toutes les réservations (GET)
 router.get("/", getAllReservations);
@@ -31,6 +32,7 @@ router.get('/stats/totalRevenueByPeriod', getTotalRevenueByPeriod);
 
 router.get('/stats/total-balance', getTotalBalance);
 router.delete("/:reservationId", deleteReservation);
+router.post('/confirm',protect,confirmReservationStatus)
 
 
 module.exports = router;
