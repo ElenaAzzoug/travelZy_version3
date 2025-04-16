@@ -86,25 +86,13 @@ const getUserInfo = async (id) => {
 };
 
 // Mise à jour du compte utilisateur
-const updateUser = async (email, password, updateData) => {
+const updateUser = async (id, userData) => {
   try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      throw new Error("User not found.");
+    if (userData.password) {
+      userData.password = await bcrypt.hash(userData.password, 10);
     }
-
-    // Vérifier le mot de passe avant la mise à jour
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      throw new Error("Invalid password.");
-    }
-
-    // Mettre à jour uniquement les champs fournis
-    Object.assign(user, updateData);
-
-    await user.save();
-    return { message: "User updated successfully" };
+    const updatedUser = await User.findByIdAndUpdate(id, { ...userData }, { new: true })
+    return { updatedUser };
   } catch (error) {
     throw error;
   }

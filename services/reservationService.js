@@ -1,30 +1,47 @@
 const mongoose = require('mongoose');
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const asyncHandler = require('express-async-handler');
 const Reservation = require('../models/reservationModel');
 const User = require("../models/userModel");
+
+
+
+
+
+
 exports.createReservation = asyncHandler(async (req, res) => {
     try {
-        const { client, voyage, paymentMethodType, status, adults, jeunes, nourrissons, prixTotal } = req.body;
+        const { voyage, paymentMethodType, adults, jeunes, nourrissons, prixTotal } = req.body;
 
         // Vérification des champs obligatoires
-        if (!client || !voyage || !paymentMethodType || !status || adults == null || jeunes == null || nourrissons == null || prixTotal == null) {
+        if (!voyage || !paymentMethodType  || adults == null || jeunes == null || nourrissons == null || prixTotal == null) {
             return res.status(400).json({ success: false, message: "Veuillez remplir tous les champs obligatoires" });
         }
 
+        // Création d'un PaymentIntent avec Stripe
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: prixTotal, // Montant en centimes
+            currency: 'usd',
+            payment_method_types: [paymentMethodType],
+        });
+
         // Création de la réservation sans dateRéservation (elle sera définie automatiquement)
         const newReservation = await Reservation.create({
-            client,
+            client:req.user.id,
             voyage,
             paymentMethodType,
-            status,
             adults,
             jeunes,
             nourrissons,
-            prixTotal
+            prixTotal,
+            paymentIntentId: paymentIntent.id, // Stockage de l'ID du PaymentIntent
         });
 
-        res.status(201).json({ success: true, data: newReservation });
+        res.status(201).json({
+            success: true,
+            data: newReservation,
+            clientSecret: paymentIntent.client_secret, // Envoi du clientSecret au client
+        });
 
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -230,4 +247,30 @@ exports.deleteReservation = asyncHandler(async (req, res) => {
     await Reservation.findByIdAndDelete(reservationId);
 
     res.status(200).json({ success: true, message: "Réservation supprimée avec succès" });
+});
+
+
+
+exports.confirmReservationStatus = asyncHandler(async (req, res) => {
+    if(!req.user.isAdmin){
+        return res.status(403).json({success:false,message:'Unothorized'})
+    }
+    const { reservationId } = req.body;
+    if(!reservationId){
+        return res.status(400).json({success:false,message:'Veuillez fournir id de reservation'})
+    }
+
+  try {
+    const reservation = await Reservation.findById(reservationId);
+    if (!reservation) {
+      return res.status(404).json({ success: false, message: 'Reservation not found' });
+    }
+
+    reservation.status = 'confirmed';
+    await reservation.save();
+
+    res.status(200).json({ success: true, message: 'Reservation confirmed' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
