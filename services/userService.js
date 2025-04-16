@@ -3,7 +3,9 @@ const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 const crypto = require("crypto");
-const generateToken = require('../middleware/jwtMiddleware')
+const generateToken = require('../middleware/jwtMiddleware')   
+
+
 // Création d'un utilisateur
 const createUser = async (userData) => {
   try {
