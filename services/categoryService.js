@@ -3,12 +3,6 @@ const slugify = require('slugify');
 const CategoryModel = require('../models/categoryModel');
 const VoyageModel = require('../models/VoyageModel'); // Import du modèle Voyage
 
-
-
-
-
-
-
 exports.createCategory = asyncHandler(async(req, res) => {
     const name = req.body.name; 
     const category = await CategoryModel.create({ // create a new category document in the database using the CategoryModel schema and the data provided in the request body
