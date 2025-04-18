@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const asyncHandler = require('express-async-handler');
 const Reservation = require('../models/reservationModel');
 const User = require("../models/userModel");
@@ -15,15 +15,15 @@ exports.createReservation = asyncHandler(async (req, res) => {
 
         // Vérification des champs obligatoires
         if (!voyage || !paymentMethodType  || adults == null || jeunes == null || nourrissons == null || prixTotal == null) {
-            return res.status(400).json({ success: false, message: "Veuillez remplir tous les champs obligatoires" });
-        }
+           return res.status(400).json({ success: false, message: "Veuillez remplir tous les champs obligatoires" });
+       }
 
         // Création d'un PaymentIntent avec Stripe
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: prixTotal, // Montant en centimes
-            currency: 'usd',
-            payment_method_types: [paymentMethodType],
-        });
+      //  const paymentIntent = await stripe.paymentIntents.create({
+      //      amount: prixTotal, // Montant en centimes
+       //     currency: 'usd',
+       //     payment_method_types: [paymentMethodType],
+       // });
 
         // Création de la réservation sans dateRéservation (elle sera définie automatiquement)
         const newReservation = await Reservation.create({
@@ -34,13 +34,13 @@ exports.createReservation = asyncHandler(async (req, res) => {
             jeunes,
             nourrissons,
             prixTotal,
-            paymentIntentId: paymentIntent.id, // Stockage de l'ID du PaymentIntent
+          //  paymentIntentId: paymentIntent.id, // Stockage de l'ID du PaymentIntent
         });
 
         res.status(201).json({
             success: true,
             data: newReservation,
-            clientSecret: paymentIntent.client_secret, // Envoi du clientSecret au client
+          //  clientSecret: paymentIntent.client_secret, // Envoi du clientSecret au client
         });
 
     } catch (error) {

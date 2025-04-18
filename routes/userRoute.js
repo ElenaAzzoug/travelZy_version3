@@ -1,7 +1,7 @@
 const User = require("../models/UserModel"); // Assure-toi que le chemin est correct
 
 const express = require("express");
-const { createUser, getUserInfo, updateUser, deleteUser, changePassword,resetPassword ,requestPasswordReset,loginUser } = require("../services/userService");
+const { createUser, getUserInfo, updateUser, deleteUser, changePassword,resetPassword ,requestPasswordReset,loginUser,activateAccount } = require("../services/userService");
 const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
 
@@ -10,6 +10,16 @@ router.post("/register", async (req, res) => {
   try {
     const user = await createUser(req.body);
     res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.get("/activate-account/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const result = await activateAccount(token);
+    res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -54,7 +64,7 @@ router.put("/me",protect, async (req, res) => {
 });
 
 // Route pour supprimer le compte (avec email + password)
-router.delete("/me", async (req, res) => {
+router.delete("/me", protect,  async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await deleteUser(email, password);
@@ -64,6 +74,18 @@ router.delete("/me", async (req, res) => {
   }
 });
 
+const { deactivateUser } = require("../services/userService"); 
+
+// Route pour désactiver le compte (avec mot de passe)
+router.put("/me/deactivate", protect, async (req, res) => {
+  try {
+    const { password } = req.body;
+    const result = await deactivateUser(req.user.id, password);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
 
 // get all users for admin

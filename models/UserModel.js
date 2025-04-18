@@ -3,8 +3,6 @@ const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  resetPasswordToken: { type: String },
-  resetPasswordExpires: { type: Date },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   profilePicture: { type: String, default: "" },
@@ -12,7 +10,21 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+   // Ajout pour l'activation du compte
+   isActive: {
+    type: Boolean,
+    default: false,
+  },
+  activationToken: {
+    type: String,
+    default: null,
+  },
+
+  // Ajouté précédemment pour le mot de passe oublié
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
 }, { timestamps: true });
+
 // Vérifie si le modèle existe déjà pour éviter l'erreur OverwriteModelError
 const User = mongoose.models.User || mongoose.model("User", UserSchema);
 

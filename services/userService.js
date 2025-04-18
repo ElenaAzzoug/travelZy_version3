@@ -4,6 +4,7 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 const crypto = require("crypto");
 const generateToken = require('../middleware/jwtMiddleware')   
+const transporter = require("./emailService"); // si c'est dans le même dossier (services/)
 
 
 // Création d'un utilisateur
@@ -20,6 +21,9 @@ const createUser = async (userData) => {
     // Hacher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Générer un token d’activation
+    const activationToken = crypto.randomBytes(32).toString("hex");
+
     // Créer l'utilisateur
     const newUser = new User({
       firstName,
@@ -27,23 +31,84 @@ const createUser = async (userData) => {
       email,
       password: hashedPassword,
       profilePicture,
-      isAdmin:false
+      isAdmin:false,
+      activationToken
     });
+     
+     
 
-    await newUser.save();
-    return { message: "User created successfully", email: newUser.email };
+    //  Sauvegarder l'utilisateur avec le token
+         await newUser.save();
+
+
+     //  Envoyer l'email avec le lien d’activation
+     const activationLink = `${process.env.CLIENT_URL}/activate-account/${activationToken}`;
+     await transporter.sendMail({
+      to: newUser.email,
+     from: process.env.EMAIL_USER,
+     subject: "Activate Your Account",
+      text: `Hello ${newUser.firstName}.Click this link to activate your account: ${activationLink}`,
+});
+
+
+    return { message: "User created successfully.Activation link sent to email.", email: newUser.email };
   } catch (error) {
     throw error;
   }
 };
 
+const activateAccount = async (token) => {
+  try {
+    const user = await User.findOne({ activationToken: token });
+
+    if (!user) {
+      throw new Error("Invalid or expired activation token.");
+    }
+
+    // Activer le compte
+    user.isActive = true;
+    user.activationToken = null; // Supprimer le token pour sécurité
+
+    await user.save();
+
+    return { message: "Account successfully activated." };
+  } catch (error) {
+    throw error;
+  }
+};
+const deactivateUser = async (userId, password) => {
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new Error("Invalid password.");
+    }
+
+    user.isActive = false;
+    await user.save();
+
+    return { message: "Account deactivated successfully." };
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 //Login User
 const loginUser = async (email, password) => {
   try {
     const user = await User.findOne({ email });
-
     if (!user) {
       throw new Error("User not found.");
+    }
+
+    if (!user.isActive) {
+      throw new Error("Please activate your account first.");
     }
 
     // Vérifier le mot de passe
@@ -148,14 +213,7 @@ const changePassword = async (email, oldPassword, newPassword) => {
   };
 
 
-// Configure nodemailer transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+   
 
 
 // Request password reset
@@ -217,4 +275,4 @@ const resetPassword = async (token, newPassword) => {
 };
   
 
-module.exports = { createUser, getUserInfo, updateUser, deleteUser, changePassword,requestPasswordReset,resetPassword,loginUser };
+module.exports = { createUser, getUserInfo, updateUser, deleteUser, changePassword,requestPasswordReset,resetPassword,loginUser,activateAccount,deactivateUser };
